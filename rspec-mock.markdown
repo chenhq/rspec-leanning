@@ -6,17 +6,17 @@ Test Double就像是陈龙大哥电影里的替身，起到以假乱真的作用
 但是，Test Double也不是万能的，Test Double不能被过度使用，因为实际交付的产品是使用实际对象的，过度使用Test Double会让测试变得越
 来越脱离实际。
 
-  rspec-mocks 是一个test-double系统框架, 在test-doubles和真实的对象上支持三个method stubs, fakes, message expections
+  rspec-mocks 是一个test-double系统框架, 在test-doubles和真实的对象上支持三个方法 stubs, fakes, message expections
 
 ## Test Doubles
 
-  test double在rspec测试中就是一个真实的对象， 它支持method stubs, message expections.
+  test double在rspec测试中就是一个真实的对象， 它支持 stubs, message expections 方法.
 
 eg:
-  book = double("book")
+  book = double("book") #这就模拟了一个book对象
 
 ## Method Stubs
-  一个method stub就是虚拟返回预先设定的一个值（求值、函数调用等等）， 可以用在test double 和真实对象上
+  一个 stub 方法就是虚拟返回预先设定的一个值（求值、函数调用等等）， 可以用在test double 和真实对象上
 
 eg:
   book.stub(:title) { "The RSpec Book" }
@@ -70,7 +70,8 @@ eg:
   person = double("person")
   Person.stub(:find) { person }
 
-  # Person 将会受到一个find消息， 会返回一个person， 在example结束的时候如果没有将会失败。
+  # Person 将会受到一个find消息， 会返回一个person， 在example结束的时候如果没有将会失败。也就是说
+  # 采用此方法必须进行调用在后面。
   person = double("person")
   Person.should_receive(:find) { person }
 
@@ -94,12 +95,22 @@ eg:
   # 原生为with提供的关键字参数
   double.should_receive(:msg).with(no_args())
   double.should_receive(:msg).with(any_args())
-  double.should_receive(:msg).with(1, kind_of(Numeric), "b") #2nd argument can be any kind of Numeric
-  double.should_receive(:msg).with(1, boolean(), "b") #2nd argument can be true or false
-  double.should_receive(:msg).with(1, /abc/, "b") #2nd argument can be any String matching the submitted Regexp
-  double.should_receive(:msg).with(1, anything(), "b") #2nd argument can be anything at all
+  
+  #2nd argument can be any kind of Numeric
+  double.should_receive(:msg).with(1, kind_of(Numeric), "b") 
+
+  #2nd argument can be true or false
+  double.should_receive(:msg).with(1, boolean(), "b") 
+
+  #2nd argument can be any String matching the submitted Regexp
+  double.should_receive(:msg).with(1, /abc/, "b") 
+
+  #2nd argument can be anything at all
+  double.should_receive(:msg).with(1, anything(), "b") 
+
+  #2nd argument can be object that responds to #abs and #div
   double.should_receive(:msg).with(1, duck_type(:abs, :div), "b")
-                    #2nd argument can be object that responds to #abs and #div
+
 
 ## 接受消息统计
   double.should_receive(:msg).once
@@ -127,13 +138,16 @@ eg:
 
   double.should_receive(:msg) { value }
 
-  当受收到对应的消息的时候， 将会执行后面block， 返回block执行的值
+  # 当受收到对应的消息的时候， 将会执行后面block， 返回block执行的值
   double.should_receive(:msg).and_return(value)
+
+  # 这个标识第一次调用返回value1,第二次返回value2,第三次返回value3...
   double.should_receive(:msg).exactly(3).times.and_return(value1, value2, value3)
-  # returns value1 the first time, value2 the second, etc
+
+  # 这里的error可以是对像或是类
+  # if it is a class, it must be instantiable with no args
   double.should_receive(:msg).and_raise(error)
-  #error can be an instantiated object or a class
-  #if it is a class, it must be instantiable with no args
+
   double.should_receive(:msg).and_throw(:msg)
   double.should_receive(:msg).and_yield(values,to,yield)
   double.should_receive(:msg).and_yield(values,to,yield).and_yield(some,other,values,this,time)
